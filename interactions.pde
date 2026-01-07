@@ -4,9 +4,7 @@ void keyPressed() {
   if (key == 's') skey = true;
   if (key == 'w') wkey = true;
    if (key == 'p' || key == 'P') {
-    if (mode == GAME) mode = PAUSE;
-    else if (mode == PAUSE) mode = GAME;
-  }
+    if (mode == GAME) mode = PAUSE;  }
 }
 
 void keyReleased() {
@@ -16,31 +14,17 @@ void keyReleased() {
   if (key == 'w') wkey = false;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 PImage reverseImage(PImage image) {
   PImage reverse = createImage(image.width, image.height, ARGB);
-  image.loadPixels();
-  reverse.loadPixels();
-
-  for (int i = 0; i < image.width; i++) {
-    for (int j = 0; j < image.height; j++) {
-      int src = j * image.width + i;
-      int dst = j * image.width + (image.width - 1 - i);
-      reverse.pixels[dst] = image.pixels[src];
+  
+  for (int y = 0; y < image.height; y++) {
+    for (int x = 0; x < image.width; x++) {
+      int oP = image.get(x, y);
+      
+      int flippedX = image.width - 1 - x;
+      
+      reverse.set(flippedX, y, oP);
     }
   }
-
-  reverse.updatePixels();
   return reverse;
 }

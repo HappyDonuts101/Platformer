@@ -42,13 +42,12 @@ class FGoomba extends FGameObject {
 
   if (isTouching("player")) {
     if(player.getY() < getY() - gridsize/2) {
-      bopSound.play();
+
       
     world.remove(this);
     enemies.remove(this);
     }  else {
-      player.setPosition(2900,350);
-      
+loselife();      
     }
   }
   }

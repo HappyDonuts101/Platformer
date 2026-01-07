@@ -1,5 +1,6 @@
 import gifAnimation.*;
 Gif introGif;
+Gif gameOverGif;
 
 import processing.sound.*;
 
@@ -35,7 +36,9 @@ int btnW=200;
 
 PFont marioFont;
 
-
+int lives = 3; 
+boolean gameOver = false; 
+int invincible; 
 
 
 PImage map, ice, stone, treeTrunk, treetop_center;
@@ -67,9 +70,7 @@ final int GAME = 1;
 final int PAUSE = 2;
 final int GAMEOVER = 3; 
 
-int mode = 0;
-
-
+int mode ;
 
 void setup() {
   size(1200, 800);
@@ -78,14 +79,18 @@ void setup() {
   introGif = new Gif(this, "mari.gif");
   introGif.loop();
   
+  
+  gameOverGif = new Gif(this, "mario.gif");
+  gameOverGif.loop();
+  
   jumpSound = new SoundFile(this, "jump.mp3");
- bopSound  = new SoundFile(this, "bop.mp3");
+  bopSound  = new SoundFile(this, "bop.mp3");
 
   terrain = new ArrayList<FGameObject>();
   enemies = new ArrayList<FGameObject>();
 
   loadImages();
-  map = loadImage("pod.png");
+  map = loadImage("pon.png");
   
   marioFont = loadFont("FranklinGothic-Heavy-48.vlw");
   textFont(marioFont);
@@ -95,6 +100,7 @@ void setup() {
 
   world.setGravity(0, 800);
 }
+
 
 void draw() {
 
@@ -137,23 +143,34 @@ fill(255);
 }
 
 void gameover() {
-  background(255, 0, 0);
+  background(0); 
+  
+  image(gameOverGif, 0, 0, width, height); 
+
   fill(255);
   textAlign(CENTER, CENTER);
   textSize(60);
-  text("YOU DIED", width/2, height/2);
+  text("YOU DIED!", width/2, height/2);
+  
+  btnX = width/2 - btnW/2;
+  btnY = height/2 + 200;
+  fill(100);
+  rect(btnX, btnY, btnW, btnH);
+  fill(255);
+  textSize(24);
+  text("RESTART", width/2, btnY + btnH/2);
 }
 
 
 
 void pause() {
-  fill(0, 150);
+  fill(0,150);
   rect(0, 0, width, height);
 
   fill(255);
   textAlign(CENTER, CENTER);
   textSize(60);
-  text("PAUSED", width/2, height/2);
+  text("PAUSED!", width/2, height/2);
 
   textSize(20);
   text("Press P to resume", width/2, height/2 + 60);
@@ -161,11 +178,39 @@ void pause() {
 
 void mousePressed() {
   if (mode == INTRO) {
-    if (mouseX > btnX && mouseX < btnX + btnW &&  mouseY > btnY && mouseY < btnY + btnH) {
+    if (mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH) {
       mode = GAME;
+    }
+  } 
+  
+  else if (mode == GAMEOVER) {
+    if (mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH) {
+      resetGame(); 
+      mode = INTRO;
     }
   }
 }
+
+void resetGame() {
+  
+ lives = 3; 
+ enemies.clear();
+ terrain.clear();
+ 
+   world = new FWorld(-20000, -20000, 20000, 20000);
+
+loadWorld(map);
+loadPlayer();
+
+    player.setRotatable(false);
+         world.setGravity(0, 800);
+
+
+ 
+  
+}
+
+
 void actWorld() {
   player.act();
 
@@ -187,7 +232,6 @@ for (int i = 0; i < terrain.size(); i++) {
   t.act();
 }
 
-  //ArrayList bodies = world.getBodies();
   for (int i = 0; i < terrain.size(); i++) {
     FBody b =  terrain.get(i);
     if (b instanceof FLava) {
@@ -195,6 +239,20 @@ for (int i = 0; i < terrain.size(); i++) {
     }
   }
 }
+
+void loselife() {
+  
+lives--;
+if (lives<=0) {
+ mode=GAMEOVER; 
+  
+} else {
+   player.setPosition(350,900);
+ player.setVelocity(0,0);
+  
+}
+}
+
 
 void loadImages() {
   stone = loadImage("brick.png"); //has a color of 
@@ -320,13 +378,36 @@ void loadWorld(PImage img) {
         i.setFriction(0.1);
         world.add(i);
       } else if (c == treeTrunkBrown) {
-        block(x, y, treeTrunk);
+          FBox ni = new FBox(gridsize, gridsize);
+           ni.setPosition(x*gridsize, y*gridsize);
+        ni.attachImage(treeTrunk);
+        ni.setStatic(true);
+        ni.setName("treetrunk");
+        world.add(ni);
       } else if (c == westgreen) {
-        block(x, y, treetop_w);
+        FBox si = new FBox(gridsize, gridsize);
+           si.setPosition(x*gridsize, y*gridsize);
+        si.attachImage(treetop_w);
+        si.setStatic(true);
+        si.setName("treetopw");
+        world.add(si);
       } else if (c == eastgreen) {
-        block(x, y, treetop_e);
+ FBox di = new FBox(gridsize, gridsize);
+           di.setPosition(x*gridsize, y*gridsize);
+        di.attachImage(treetop_e);
+        di.setStatic(true);
+        di.setName("treetope");
+        world.add(di);        
+        
+        
       } else if (c == intersectgreen) {
-        block(x, y, treetop_intersect);
+         FBox pi = new FBox(gridsize, gridsize);
+
+         pi.setPosition(x*gridsize, y*gridsize);
+        pi.attachImage(treetop_intersect);
+        pi.setStatic(true);
+        pi.setName("treetopintersect");
+        world.add(pi);    
       } else if (c == purple) {
         FBox s = new FBox(gridsize, gridsize);
         s.setPosition(x * gridsize, y * gridsize);
@@ -386,13 +467,7 @@ FHammerBro hb = new FHammerBro(x * gridsize, y * gridsize);
   }
 }
 
-void block(int x, int y, PImage img) {
-  FBox b = new FBox(gridsize, gridsize);
-  b.setPosition(x * gridsize, y * gridsize);
-  b.attachImage(img);
-  b.setStatic(true);
-  world.add(b);
-}
+
 
 void drawWorld() {
   pushMatrix();
@@ -408,69 +483,16 @@ void loadPlayer() {
   world.add(player);
 }
 
-class FBridge extends FGameObject {
- FBridge(float x, float y) {
-  super();
-  setPosition(x,y);
-  setStatic(true);
-  setName("bridge");
-  attachImage(bridgeImg);
- }
-  
-  void act() {
-   if(isTouching("player")) {
-    setStatic(false);
-    setSensor(true);
-     
-   }
-    
-  }
-  
-}
-
-
-
-
-
-
-
-class FHammer extends FGameObject {
-
-  FHammer(float x, float y, float vx) {
-    super();
-    setPosition(x, y);
-    setName("hammer");
-    setSensor(true);
-    attachImage(hammer);
-
-    setVelocity(vx, -350);   
-    setAngularVelocity(10);
-  }
-
-  void act() {
-    if (isTouching("player")) {
-      player.setPosition(350, 900);
-      player.setVelocity(0, 0);
-      world.remove(this);
-    }
-
-    if (getY() > 20000) {
-      world.remove(this);
-    }
-  }
-}
-
-
-
 class FHammerBro extends FGameObject {
 
   int direction = R;
   int speed = 40;
 
-
-
   int timer = 0;
   int delay = 120;
+  
+  FBox hammerObj ;
+  
 
   FHammerBro(float x, float y) {
     super();
@@ -479,14 +501,13 @@ class FHammerBro extends FGameObject {
     setRotatable(false);
     attachImage(hammerbro[0]);
   }
-
-  void act() {
-    walk();
-    turn();
-    throwHammer();
-    Reset();
-  }
-
+void act() {
+  walk();
+  turn();
+  throwHammer();
+  damagePlayer();
+  Reset();
+}
   void walk() {
     setVelocity(speed * direction, getVelocityY());
   }
@@ -495,6 +516,17 @@ class FHammerBro extends FGameObject {
     if (isTouching("wall")) {
       direction *= -1;
       setPosition(getX() + direction, getY());
+      
+    }
+    
+    if(direction==R) {
+     attachImage(hammerbro[0]); 
+      
+    }
+    
+    if(direction == L) {
+     attachImage(hammerbro[1]); 
+      
     }
   }
 
@@ -504,18 +536,33 @@ class FHammerBro extends FGameObject {
     if (timer >= delay) {
       timer = 0;
 
-      float vx = 250 * direction; 
-    FHammer h = new FHammer(getX(), getY() - gridsize/2, vx);
+ hammerObj = new FBox(gridsize/2, gridsize/2);
+ hammerObj.setPosition(getX(), getY()-gridsize/2);
+  hammerObj .setName("hammer");
+ hammerObj .setSensor(true);
+  hammerObj .attachImage(hammer);
+ hammerObj.setVelocity(250*direction, -350);
+  hammerObj .setAngularVelocity(10);
+  
 
-    world.add(h);
-    enemies.add(h); 
+    world.add(hammerObj );
     }
   }
 
   void Reset() {
     if (isTouching("player")) {
-      player.setPosition(350, 900);
-      player.setVelocity(0, -300);
+      loselife();
     }
   }
+  
+  
+void damagePlayer() {
+  if (player.isTouching("hammer")) { 
+    player.setPosition(350, 900);
+    world.remove(hammerObj);
+  
+  }
+}
+
+
 }

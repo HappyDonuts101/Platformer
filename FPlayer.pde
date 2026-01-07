@@ -15,17 +15,13 @@ class FPlayer extends FGameObject {
     super();
     frame = 0;
     direction = R;
-    setPosition(2930, 900);
+    setPosition(350, 900);
     setName("player");
     setRotatable(false);
   }
-
-
-
-
-
   void act() {
-    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone");
+    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone") 
+    || isTouching("treetrunk") || isTouching("treetopw") || isTouching ("treetope") || isTouching ("treetopintersect");
 
     if (onGround && abs(getVelocityY()) < 1) {
       jumps = 0;
@@ -35,17 +31,16 @@ class FPlayer extends FGameObject {
     animate();
 
     if (isTouching("spike") || isTouching("lava" )) {
-      setPosition(350, 900);
-      setVelocity(0, 0);
+  loselife();
     }
   }
 
   void input() {
-    float vy = getVelocityY();
-    float vx = getVelocityX();
     boolean moving = false;
+    float vx = getVelocityX();
+    float vy = getVelocityY();
 
-    if (akey) {
+    if (akey==true) {
       setVelocity(-maxSpeed, vy);
       moving = true;
       direction = L;
@@ -61,9 +56,8 @@ class FPlayer extends FGameObject {
       if (jumps < maxJ) {
         
         jumpSound.play();
-       jumpSound.amp(0.6);
-
-        setVelocity(vx , -jStrength);
+       jumpSound.amp(0.367);
+       setVelocity(vx , -jStrength);
 
         jumps++;
       }
@@ -76,7 +70,6 @@ class FPlayer extends FGameObject {
     else if (moving==true) action = run;
     else action = idle;
   }
-
   void animate() {
     if (frame >= action.length) frame = 0;
 

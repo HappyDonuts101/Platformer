@@ -10,9 +10,7 @@ class FShell extends FGameObject {
   int direction = R;
   int speed = 450;
 
-  //boolean wasTouchingWall = false;
-  //boolean dead = false;
-
+ 
   FShell(float x, float y) {
     super();
     setPosition(x, y);
@@ -39,7 +37,7 @@ class FShell extends FGameObject {
       killenemies();
     }
     
- if (cooldown > 0) cooldown--;
+ if (cooldown > 0) cooldown= cooldown - 1 ;
 
 
   }

@@ -1,10 +1,14 @@
 class FThwomp extends FGameObject {
 
   boolean awake = false;
+  boolean rising = false;
+  float startY; 
+  
 
   FThwomp(float x, float y) {
     super();
     setPosition(x, y);
+    startY = y;
     setStatic(true);
     setRotatable(false);
     setName("thwomp");
@@ -14,13 +18,22 @@ class FThwomp extends FGameObject {
   void act() {
     if (awake==false) {
       wakeup();
+    } else {
+     if(getVelocityY() ==0) {
+      rise(); 
+       
+     }
     }
+    
+    
+    
     if (awake && isTouching("player")) {
       damagePlayer();
-    }
+    } 
+   
   }
   void wakeup() {
-    if (abs(player.getX() - getX()) < gridsize / 2 &&   player.getY() > getY()) {
+    if (abs(player.getX() - getX()) < 32 &&   player.getY() > getY()) {
 
       awake = true;
       setStatic(false);       
@@ -29,7 +42,25 @@ class FThwomp extends FGameObject {
   }
 
   void damagePlayer() {
-    player.setPosition(350, 900); 
-    player.setVelocity(0, 0);
+    loselife();
+  }
+  
+  
+  void rise() {
+    setStatic(true);
+   if(getY()>startY) {
+   setPosition(getX(), getY() - 2); 
+    
+     
+   } else {    
+     setPosition(getX(), startY);
+
+     awake = false;
+     rising = false; 
+    attachImage(thwomp[0]); 
+     
+   }
+    
+    
   }
 }
