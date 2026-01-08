@@ -1,3 +1,10 @@
+//Ethan Song
+//Mario Platformer Game
+//1. Make THWOMPS BIGGER  : COMPLETED
+//2. Fix the lag/smoothness. :  COMPLETED 
+//3. Add levels into the game : HALF DONE
+//4. Add a block that when you touch it you go to the next level. : Completed 
+/* **/
 import gifAnimation.*;
 Gif introGif;
 Gif gameOverGif;
@@ -28,6 +35,9 @@ color beige = #fdf0d5;
 color dgreen = #283618;
 color dpink = #dd2d4a;
 color maroon = #780000;
+color center = #bc6c25;
+color edge = #dda15e;
+color coins = #d90429;
 
 float btnX;
 float btnY;
@@ -43,7 +53,7 @@ int invincible;
 
 PImage map, ice, stone, treeTrunk, treetop_center;
 PImage treetop_w, treetop_e, treetop_intersect, eric, lemon, agoost, dirtN;
-PImage spike, bridgeImg, trampoline, hammer, shells;
+PImage spike, bridgeImg, trampoline, hammer, shells, coin;
 
 PImage[] idle;
 PImage[] jump;
@@ -54,11 +64,17 @@ PImage[] lava;
 PImage[] thwomp;
 PImage[] hammerbro;
 
+String[] maps = {"amsk.png", "level2.png"};
+int level = 0; 
+
 ArrayList<FGameObject> terrain;
 ArrayList<FGameObject> enemies;
 
 int gridsize = 32;
 float zoom = 1.5;
+
+
+
 
 boolean akey, dkey, skey, wkey;
 
@@ -90,7 +106,7 @@ void setup() {
   enemies = new ArrayList<FGameObject>();
 
   loadImages();
-  map = loadImage("pon.png");
+  map = loadImage("amsk.png");
   
   marioFont = loadFont("FranklinGothic-Heavy-48.vlw");
   textFont(marioFont);
@@ -203,16 +219,17 @@ loadWorld(map);
 loadPlayer();
 
     player.setRotatable(false);
-         world.setGravity(0, 800);
-
-
- 
-  
+    world.setGravity(0, 800);
 }
 
 
 void actWorld() {
   player.act();
+  
+   if(player.isTouching("coin")) {
+     level(); 
+      return;
+    }
 
   for (int i = enemies.size() - 1; i >= 0; i--) {
     FGameObject e = enemies.get(i);
@@ -225,6 +242,8 @@ void actWorld() {
         enemies.remove(i);
       }
     }
+    
+   
   }
 
 for (int i = 0; i < terrain.size(); i++) {
@@ -237,6 +256,9 @@ for (int i = 0; i < terrain.size(); i++) {
     if (b instanceof FLava) {
       ((FLava)b).act();
     }
+    
+    
+    
   }
 }
 
@@ -255,7 +277,7 @@ if (lives<=0) {
 
 
 void loadImages() {
-  stone = loadImage("brick.png"); //has a color of 
+  stone = loadImage("brick.png"); 
   ice = loadImage("blueBlock.png");
   treeTrunk = loadImage("tree_trunk.png");
   treetop_w = loadImage("treetop_w.png");
@@ -264,13 +286,13 @@ void loadImages() {
   treetop_intersect = loadImage("tree_intersect.png");
   spike = loadImage("spike.png");
   bridgeImg = loadImage("bridge_center.png");
-  eric = loadImage("eric.png");
-  lemon = loadImage("lemon.png");
-  agoost = loadImage("agoost.png");
   dirtN = loadImage("dirt_n.png");
   trampoline = loadImage("trampoline.png");
   hammer = loadImage("hammer.png");
   shells = loadImage("greenshell.png");
+  coin = loadImage("coin.png");
+  
+  coin.resize(gridsize, gridsize);
   
   shells.resize(gridsize, gridsize);
   
@@ -310,8 +332,8 @@ void loadImages() {
 
 
 
-  thwomp[0].resize(gridsize, gridsize);
-  thwomp[1].resize(gridsize, gridsize);
+  thwomp[0].resize(gridsize*2, gridsize*2);
+  thwomp[1].resize(gridsize*2, gridsize*2);
   
  hammerbro = new PImage[2];
  hammerbro[0] = loadImage("hammerbro0.png");
@@ -329,9 +351,6 @@ void loadImages() {
   treetop_intersect.resize(gridsize, gridsize);
   spike.resize(gridsize, gridsize);
   bridgeImg.resize(gridsize, gridsize);
-  eric.resize(gridsize, gridsize);
-  lemon.resize(gridsize, gridsize);
-  agoost.resize(gridsize, gridsize);
   dirtN.resize(gridsize, gridsize);
   trampoline.resize(gridsize, gridsize);
 
@@ -417,9 +436,8 @@ void loadWorld(PImage img) {
         world.add(s);
       } else if (c == pink) {
         FBridge br = new FBridge(x * gridsize, y * gridsize);
-        world.add(br);  FThwomp th = new FThwomp(x * gridsize, y * gridsize);
-  enemies.add(th);
-  world.add(th);
+        world.add(br);
+     
         terrain.add(br);
       } else if (c == yellow) {
         FBox d = new FBox(gridsize, gridsize);
@@ -445,7 +463,7 @@ void loadWorld(PImage img) {
         lv.setName("lava");
         world.add(lv);
         terrain.add(lv);
-      }  else if (c == dblue) {
+      }  else if (c == center) {
   FThwomp th = new FThwomp(x * gridsize, y * gridsize);
   enemies.add(th);
   world.add(th);
@@ -460,15 +478,25 @@ FHammerBro hb = new FHammerBro(x * gridsize, y * gridsize);
  enemies.add(sh);
  world.add(sh);
   
+} else if (c==edge) {
+  
+  
+}
+
+else if (c==coins) {
+ FBox coo = new FBox(gridsize, gridsize);
+        coo.setPosition(x*gridsize, y*gridsize);
+        coo.attachImage(coin);
+        coo.setStatic(true);
+        coo.setSensor(true);
+        coo.setName("coin");
+        world.add(coo);  
 }
 
 
     }
   }
 }
-
-
-
 void drawWorld() {
   pushMatrix();
   translate(-player.getX()*zoom + width/2, -player.getY()*zoom + height/2);
@@ -483,6 +511,31 @@ void loadPlayer() {
   world.add(player);
 }
 
+void level() {
+  level = level + 1;
+  
+  if (level < maps.length) {
+    world.clear();
+    enemies.clear();
+    terrain.clear();
+    
+    map = loadImage(maps[level]);
+    
+    loadWorld(map);
+    
+    loadPlayer();
+    
+    player.setVelocity(0, 0);
+    player.setRotatable(false);
+    world.setGravity(0, 800);
+    lives = 3; 
+    
+  } else {
+    mode = INTRO;
+    level = 0;
+  }
+}
+
 class FHammerBro extends FGameObject {
 
   int direction = R;
@@ -490,8 +543,10 @@ class FHammerBro extends FGameObject {
 
   int timer = 0;
   int delay = 120;
+   int frame;
+
   
-  FBox hammerObj ;
+  FBox hammers;
   
 
   FHammerBro(float x, float y) {
@@ -516,7 +571,6 @@ void act() {
     if (isTouching("wall")) {
       direction *= -1;
       setPosition(getX() + direction, getY());
-      
     }
     
     if(direction==R) {
@@ -525,8 +579,7 @@ void act() {
     }
     
     if(direction == L) {
-     attachImage(hammerbro[1]); 
-      
+  attachImage(reverseImage(hammerbro[0]));      
     }
   }
 
@@ -536,33 +589,44 @@ void act() {
     if (timer >= delay) {
       timer = 0;
 
- hammerObj = new FBox(gridsize/2, gridsize/2);
- hammerObj.setPosition(getX(), getY()-gridsize/2);
-  hammerObj .setName("hammer");
- hammerObj .setSensor(true);
-  hammerObj .attachImage(hammer);
- hammerObj.setVelocity(250*direction, -350);
-  hammerObj .setAngularVelocity(10);
+ hammers = new FBox(gridsize/2, gridsize/2);
+ hammers.setPosition(getX(), getY()-gridsize/2);
+  hammers .setName("hammer");
+ hammers .setSensor(true);
+  hammers .attachImage(hammer);
+ hammers.setVelocity(250*direction, -350);
+  hammers.setAngularVelocity(10 * direction);
   
 
-    world.add(hammerObj );
+    world.add(hammers);
     }
   }
 
   void Reset() {
-    if (isTouching("player")) {
-      loselife();
+    
+
+  if (isTouching("player")) {
+    if(player.getY() < getY() - gridsize/2) {
+
+      
+    world.remove(this);
+    enemies.remove(this);
+    }  else {
+loselife();      
     }
   }
-  
-  
+     
+  }
+
 void damagePlayer() {
   if (player.isTouching("hammer")) { 
     player.setPosition(350, 900);
-    world.remove(hammerObj);
+    world.remove(hammers);
   
   }
 }
+
+
 
 
 }

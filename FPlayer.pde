@@ -3,7 +3,6 @@ class FPlayer extends FGameObject {
   int frame;
   int direction;
   
-
   float jStrength = 430;
   float maxSpeed = 200;
   int maxJ = 3;
@@ -23,6 +22,8 @@ class FPlayer extends FGameObject {
     onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone") 
     || isTouching("treetrunk") || isTouching("treetopw") || isTouching ("treetope") || isTouching ("treetopintersect");
 
+       
+
     if (onGround && abs(getVelocityY()) < 1) {
       jumps = 0;
     }
@@ -33,6 +34,8 @@ class FPlayer extends FGameObject {
     if (isTouching("spike") || isTouching("lava" )) {
   loselife();
     }
+    
+   
   }
 
   void input() {

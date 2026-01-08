@@ -41,9 +41,7 @@ class FGoomba extends FGameObject {
   }
 
   if (isTouching("player")) {
-    if(player.getY() < getY() - gridsize/2) {
-
-      
+    if(player.getY() < getY() - gridsize/2) {    
     world.remove(this);
     enemies.remove(this);
     }  else {

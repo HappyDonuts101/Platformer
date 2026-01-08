@@ -21,4 +21,8 @@ class FGameObject extends FBox
   }
   void act() {
   }
+  
+  FGameObject(float w, float h) {
+    super(w, h);
+  }
 }

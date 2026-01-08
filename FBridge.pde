@@ -12,6 +12,7 @@ class FBridge extends FGameObject {
     setStatic(false);
     setSensor(true);
      
+ 
    }
     
   }
