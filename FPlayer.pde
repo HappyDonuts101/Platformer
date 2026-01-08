@@ -1,5 +1,8 @@
 class FPlayer extends FGameObject {
 
+  
+  
+  PImage[] idleL, jumpL, runL;
   int frame;
   int direction;
   
@@ -14,7 +17,7 @@ class FPlayer extends FGameObject {
     super();
     frame = 0;
     direction = R;
-    setPosition(350, 900);
+    setPosition(250, 900);
     setName("player");
     setRotatable(false);
   }
@@ -58,8 +61,8 @@ class FPlayer extends FGameObject {
     if (wkey) {
       if (jumps < maxJ) {
         
-        jumpSound.play();
-       jumpSound.amp(0.367);
+       // jumpSound.play();
+       //jumpSound.amp(0.367);
        setVelocity(vx , -jStrength);
 
         jumps++;

@@ -1,9 +1,10 @@
+
+
 class FThwomp extends FGameObject {
  boolean awake = false;
  boolean rising = false;
  float startY;
-  
-
+ 
 
 FThwomp(float x, float y) {
   super(gridsize*2, gridsize*2);

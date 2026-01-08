@@ -4,15 +4,19 @@
 //2. Fix the lag/smoothness. :  COMPLETED 
 //3. Add levels into the game : HALF DONE
 //4. Add a block that when you touch it you go to the next level. : Completed 
+//5. Fix the Lag
+//6. Makes shells work 
+//7.
+
 /* **/
-import gifAnimation.*;
-Gif introGif;
-Gif gameOverGif;
+//import gifAnimation.*;
+//Gif introGif;
+//Gif gameOverGif;
 
-import processing.sound.*;
+//import processing.sound.*;
 
-SoundFile jumpSound;
-SoundFile bopSound;
+//SoundFile jumpSound;
+//SoundFile bopSound;
 
 import fisica.*;
 //Color Pallete
@@ -92,15 +96,15 @@ void setup() {
   size(1200, 800);
   Fisica.init(this);
   
-  introGif = new Gif(this, "mari.gif");
-  introGif.loop();
+  //introGif = new Gif(this, "mari.gif");
+  //introGif.loop();
   
   
-  gameOverGif = new Gif(this, "mario.gif");
-  gameOverGif.loop();
+  //gameOverGif = new Gif(this, "mario.gif");
+  //gameOverGif.loop();
   
-  jumpSound = new SoundFile(this, "jump.mp3");
-  bopSound  = new SoundFile(this, "bop.mp3");
+  //jumpSound = new SoundFile(this, "jump.mp3");
+  //bopSound  = new SoundFile(this, "bop.mp3");
 
   terrain = new ArrayList<FGameObject>();
   enemies = new ArrayList<FGameObject>();
@@ -139,7 +143,7 @@ void draw() {
 }
 
 void intro() {
-image(introGif, 0,0, width, height);
+//image(introGif, 0,0, width, height);
 
 fill(255);
   textAlign(CENTER, CENTER);
@@ -161,7 +165,7 @@ fill(255);
 void gameover() {
   background(0); 
   
-  image(gameOverGif, 0, 0, width, height); 
+  //image(gameOverGif, 0, 0, width, height); 
 
   fill(255);
   textAlign(CENTER, CENTER);
@@ -251,15 +255,7 @@ for (int i = 0; i < terrain.size(); i++) {
   t.act();
 }
 
-  for (int i = 0; i < terrain.size(); i++) {
-    FBody b =  terrain.get(i);
-    if (b instanceof FLava) {
-      ((FLava)b).act();
-    }
-    
-    
-    
-  }
+ 
 }
 
 void loselife() {
@@ -277,6 +273,9 @@ if (lives<=0) {
 
 
 void loadImages() {
+  
+  
+
   stone = loadImage("brick.png"); 
   ice = loadImage("blueBlock.png");
   treeTrunk = loadImage("tree_trunk.png");
@@ -501,7 +500,8 @@ void drawWorld() {
   pushMatrix();
   translate(-player.getX()*zoom + width/2, -player.getY()*zoom + height/2);
   scale(zoom);
-  world.step();
+  
+  world.step(); 
   world.draw();
   popMatrix();
 }
@@ -515,24 +515,25 @@ void level() {
   level = level + 1;
   
   if (level < maps.length) {
-    world.clear();
+    world.clear(); 
     enemies.clear();
     terrain.clear();
     
+    world = new FWorld(-20000, -20000, 20000, 20000);
+    world.setGravity(0, 800);
+    
     map = loadImage(maps[level]);
-    
     loadWorld(map);
-    
     loadPlayer();
     
     player.setVelocity(0, 0);
     player.setRotatable(false);
-    world.setGravity(0, 800);
     lives = 3; 
     
   } else {
     mode = INTRO;
     level = 0;
+    map = loadImage(maps[level]);
   }
 }
 
