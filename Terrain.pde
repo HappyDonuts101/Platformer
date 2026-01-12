@@ -42,6 +42,8 @@ color maroon = #780000;
 color center = #bc6c25;
 color edge = #dda15e;
 color coins = #d90429;
+color booo = #283618;
+color kTroopa = #fb5607;
 
 float btnX;
 float btnY;
@@ -52,12 +54,11 @@ PFont marioFont;
 
 int lives = 3;
 boolean gameOver = false;
-int invincible;
 
 
 PImage map, ice, stone, treeTrunk, treetop_center;
 PImage treetop_w, treetop_e, treetop_intersect, eric, lemon, agoost, dirtN;
-PImage spike, bridgeImg, trampoline, hammer, shells, coin;
+PImage spike, bridgeImg, trampoline, hammer, shells, coin, boo, koopaTroopa;
 
 PImage[] idle;
 PImage[] jump;
@@ -68,7 +69,7 @@ PImage[] lava;
 PImage[] thwomp;
 PImage[] hammerbro;
 
-String[] maps = {"amsk.png", "level2.png"};
+String[] maps = {"pas.png", "level2.png"};
 int level = 0;
 
 ArrayList<FGameObject> terrain;
@@ -76,9 +77,6 @@ ArrayList<FGameObject> enemies;
 
 int gridsize = 32;
 float zoom = 1.5;
-
-
-
 
 boolean akey, dkey, skey, wkey;
 
@@ -107,7 +105,7 @@ void setup() {
   enemies = new ArrayList<FGameObject>();
 
   loadImages();
-  map = loadImage("amsk.png");
+  map = loadImage("pas.png");
 
   marioFont = loadFont("FranklinGothic-Heavy-48.vlw");
   textFont(marioFont);
@@ -117,7 +115,6 @@ void setup() {
 
   world.setGravity(0, 800);
 }
-
 
 void draw() {
 
@@ -302,6 +299,13 @@ void loadImages() {
   hammer = loadImage("hammer.png");
   shells = loadImage("greenshell.png");
   coin = loadImage("coin.png");
+  boo = loadImage("boom.png");
+  koopaTroopa = loadImage("koopa.png");
+  
+  koopaTroopa.resize(gridsize, gridsize);
+  
+  boo.resize(gridsize, gridsize);
+  
 
   coin.resize(gridsize, gridsize);
 
@@ -490,6 +494,18 @@ void loadWorld(PImage img) {
         coo.setSensor(true);
         coo.setName("coin");
         world.add(coo);
+      }
+      
+      else if(c==booo) {
+        FBoo bo = new FBoo(x*gridsize, y*gridsize);
+        enemies.add(bo);
+        world.add(bo);
+        
+      }
+      else if(c==kTroopa) {
+       FkoopaTroopa to = new FkoopaTroopa(x*gridsize, y*gridsize); 
+       enemies.add(to);
+       world.add(to);
       }
     }
   }
@@ -718,6 +734,11 @@ class FGoomba extends FGameObject {
         loselife();
       }
     }
+    
+    if(isTouching ("shell")) {
+     world.remove(this);
+     enemies.remove(this);
+    }
   }
 }
 
@@ -726,8 +747,26 @@ class FGoomba extends FGameObject {
 
 
 
+class FkoopaTroopa extends FGameObject{
+  
+FkoopaTroopa(float x, float y) {
+  super();
+  setPosition(x,y);
+  setStatic(true);
+  setName("koopatroopa");
+  attachImage(koopaTroopa);
+  
+  
+}
+void act() {
+  if (isTouching("player")) {
+      if (player.getY() < getY() - gridsize/2) {
+      } 
+    }  
+}
 
-
+  
+}
 
 class FLava extends FGameObject {
 
@@ -765,7 +804,7 @@ class FPlayer extends FGameObject {
   int direction;
 
   float jStrength = 430;
-  float maxSpeed = 200;
+  float speed = 200;
   int maxJ = 3;
 
   int jumps = 0;
@@ -775,14 +814,13 @@ class FPlayer extends FGameObject {
     super();
     frame = 0;
     direction = R;
-    setPosition(350, 900);
+    setPosition(2500, 900);
     setName("player");
     setRotatable(false);
   }
   void act() {
     onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone")
-      || isTouching("treetrunk") || isTouching("treetopw") || isTouching ("treetope") || isTouching ("treetopintersect") || isTouching("bridge");
-
+    || isTouching("treetrunk") || isTouching("treetopw") || isTouching ("treetope") || isTouching ("treetopintersect") || isTouching("bridge");
 
 
     if (onGround && abs(getVelocityY()) < 1) {
@@ -803,13 +841,13 @@ class FPlayer extends FGameObject {
     float vy = getVelocityY();
 
     if (akey==true) {
-      setVelocity(-maxSpeed, vy);
+      setVelocity(-speed, vy);
       moving = true;
       direction = L;
     }
 
     if (dkey) {
-      setVelocity(maxSpeed, vy);
+      setVelocity(speed, vy);
       moving = true;
       direction = R;
     }
@@ -842,11 +880,10 @@ class FPlayer extends FGameObject {
     }
   }
 }
-
 class FShell extends FGameObject {
 
-
-
+  int direction = 0;   
+  int speed = 500;
 
   FShell(float x, float y) {
     super();
@@ -854,29 +891,57 @@ class FShell extends FGameObject {
     setName("shell");
     setStatic(true);
     setRotatable(false);
-    setFriction(0.2);
     attachImage(shells);
   }
 
   void act() {
-    interaction();
-    move();
-    bounce();
-    killenemies();
+ 
+    }
+
+   
+}
+
+class FBoo extends FGameObject {
+
+  int speed = 2;
+
+  FBoo(float x, float y) {
+    super();
+    setPosition(x, y);
+    setName("boo");
+    setStatic(true);     
+    setRotatable(false);
+    attachImage(boo);
+    setNoStroke();
+    setNoFill();
   }
 
-  void interaction() {
-  }
+  void act() {
 
-  void move() {
-  }
+    if (player.direction == R && getX() > player.getX()) return;
+    if (player.direction == L && getX() < player.getX()) return;
 
-  void bounce() {
-  }
+    if (player.getX() > getX()) setPosition(getX() + speed, getY());
+    if (player.getX() < getX()) setPosition(getX() - speed, getY());
 
-  void killenemies() {
+    if (player.getY() > getY()) setPosition(getX(), getY() + speed);
+    if (player.getY() < getY()) setPosition(getX(), getY() - speed);
+
+    if (isTouching("player")) {
+      if (player.getY() < getY() - gridsize/2) {
+        world.remove(this);
+        enemies.remove(this);
+      } else {
+        loselife();
+      }
+    }
   }
 }
+
+
+ 
+  
+
 
 class FThwomp extends FGameObject {
   boolean awake = false;
