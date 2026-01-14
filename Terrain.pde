@@ -1,12 +1,5 @@
 //Ethan Song
 //Mario Platformer Game
-//1. Make THWOMPS BIGGER  : COMPLETED
-//2. Fix the lag/smoothness. :  COMPLETED
-//3. Add levels into the game : HALF DONE
-//4. Add a block that when you touch it you go to the next level. : Completed
-//5. Fix the Lag : Completed
-//6. Makes shells work
-//7. Fix Mode Framework issue: Completed
 
 /* **/
 //import gifAnimation.*;
@@ -69,7 +62,7 @@ PImage[] lava;
 PImage[] thwomp;
 PImage[] hammerbro;
 
-String[] maps = {"pas.png", "level2.png"};
+String[] maps = {"lms.png", "level2.png"};
 int level = 0;
 
 ArrayList<FGameObject> terrain;
@@ -78,7 +71,7 @@ ArrayList<FGameObject> enemies;
 int gridsize = 32;
 float zoom = 1.5;
 
-boolean akey, dkey, skey, wkey;
+boolean akey, dkey, skey, wkey, upkey, leftkey, rightkey, downkey;
 
 FPlayer player;
 FWorld world;
@@ -105,7 +98,7 @@ void setup() {
   enemies = new ArrayList<FGameObject>();
 
   loadImages();
-  map = loadImage("pas.png");
+  map = loadImage("lms.png");
 
   marioFont = loadFont("FranklinGothic-Heavy-48.vlw");
   textFont(marioFont);
@@ -192,7 +185,6 @@ void gameover() {
   textSize(24);
   text("RESTART", width/2, btnY + btnH/2);
 }
-
 
 
 void pause() {
@@ -746,27 +738,65 @@ class FGoomba extends FGameObject {
 
 
 
+class FkoopaTroopa extends FGameObject {
 
-class FkoopaTroopa extends FGameObject{
-  
-FkoopaTroopa(float x, float y) {
-  super();
-  setPosition(x,y);
-  setStatic(true);
-  setName("koopatroopa");
-  attachImage(koopaTroopa);
-  
-  
-}
-void act() {
-  if (isTouching("player")) {
-      if (player.getY() < getY() - gridsize/2) {
-      } 
-    }  
+  int direction = L;
+  int speed = 50;
+  int frame = 0;
+
+  FkoopaTroopa(float x, float y) {
+    super();
+    setPosition(x, y);
+    setStatic(false);
+    setName("koopatroopa");
+    setRotatable(false);
+    attachImage(koopaTroopa);
+  }
+
+  void act() {
+    move();
+    collide();
+  }
+
+  void move() {
+    float vy = getVelocityY();
+    setVelocity(speed * direction, vy);
+  }
+
+  void collide() {
+
+    if (isTouching("wall")) {
+      direction = direction * -1;
+      setPosition(getX() + direction, getY());
+        attachImage(reverseImage(koopaTroopa));
+
+    }
+    
+
+    if (isTouching("player")) {
+
+      if (player.getY() < getY()) {
+
+        FShell shell = new FShell(getX(), getY());
+        world.add(shell);
+        enemies.add(shell);
+
+        world.remove(this);
+        enemies.remove(this);
+      }
+      else {
+        loselife();
+      }
+    }
+
+    if (isTouching("shell")) {
+      world.remove(this);
+      enemies.remove(this);
+    }
+  }
 }
 
-  
-}
+
 
 class FLava extends FGameObject {
 
@@ -796,9 +826,7 @@ class FLava extends FGameObject {
 
 
 class FPlayer extends FGameObject {
-
-
-
+  
   PImage[] idleL, jumpL, runL;
   int frame;
   int direction;
@@ -814,10 +842,10 @@ class FPlayer extends FGameObject {
     super();
     frame = 0;
     direction = R;
-    setPosition(2500, 900);
+    setPosition(0, 2800);
     setName("player");
     setRotatable(false);
-  }
+ }
   void act() {
     onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone")
     || isTouching("treetrunk") || isTouching("treetopw") || isTouching ("treetope") || isTouching ("treetopintersect") || isTouching("bridge");
@@ -840,19 +868,19 @@ class FPlayer extends FGameObject {
     float vx = getVelocityX();
     float vy = getVelocityY();
 
-    if (akey==true) {
+    if (akey || leftkey) {
       setVelocity(-speed, vy);
       moving = true;
       direction = L;
     }
 
-    if (dkey) {
+    if (dkey||rightkey)  {
       setVelocity(speed, vy);
       moving = true;
       direction = R;
     }
 
-    if (wkey) {
+    if (wkey||upkey) {
       if (jumps < maxJ) {
 
         // jumpSound.play();
@@ -882,24 +910,61 @@ class FPlayer extends FGameObject {
 }
 class FShell extends FGameObject {
 
-  int direction = 0;   
-  int speed = 500;
+  int direction = 0; 
+  int speed = 350;
 
   FShell(float x, float y) {
     super();
     setPosition(x, y);
+    setStatic(false);
     setName("shell");
-    setStatic(true);
     setRotatable(false);
     attachImage(shells);
   }
 
   void act() {
- 
+    float vy = getVelocityY();
+    setVelocity(direction * speed, vy);
+    
+  
+    collide();
+  }
+
+  void collide() {
+    if (isTouching("wall")) {
+      direction = direction * -1;
+      setPosition(getX() + direction, getY()); 
     }
 
-   
+    if (isTouching("player")) {
+      if (player.getY() < getY() - gridsize/2) {
+        
+        direction = 0; 
+        player.setVelocity(player.getVelocityX(), -300);
+      } 
+      else {
+        if (direction == 0) {
+          if (player.getX() < getX()) {
+            direction = 1; 
+          } else {
+            direction = -1; 
+          }
+          setPosition(getX() + direction * 5, getY()); 
+        } else {
+          loselife();
+        }
+      }
+    }
+
+    if (direction != 0) {
+      if (isTouching("goomba") || isTouching("boo") || isTouching("koopatroopa")) {
+      
+      }
+    }
+  }
 }
+
+
 
 class FBoo extends FGameObject {
 
@@ -912,8 +977,6 @@ class FBoo extends FGameObject {
     setStatic(true);     
     setRotatable(false);
     attachImage(boo);
-    setNoStroke();
-    setNoFill();
   }
 
   void act() {
@@ -934,6 +997,12 @@ class FBoo extends FGameObject {
       } else {
         loselife();
       }
+    }
+    
+    
+if(isTouching ("shell")) {
+     world.remove(this);
+     enemies.remove(this);
     }
   }
 }
@@ -996,50 +1065,4 @@ class FThwomp extends FGameObject {
   void damagePlayer() {
     loselife();
   }
-}
-
-void keyPressed() {
-  if (key == 'a') akey = true;
-  if (key == 'A') akey = true;
-
-  if (key == 'd') dkey = true;
-  if (key == 'D') dkey = true;
-
-  if (key == 's') skey = true;
-  if (key == 'S') skey = true;
-
-  if (key == 'w' ) wkey = true;
-  if (key == 'W' ) wkey = true;
-
-  if (key == 'p' || key == 'P') {
-    if (mode == GAME) mode = PAUSE;
-  }
-}
-
-void keyReleased() {
-  if (key == 'a') akey = false;
-  if (key == 'A') akey = false;
-
-  if (key == 'd') dkey = false;
-  if (key == 'D') dkey = false;
-
-  if (key == 's') skey = false;
-  if (key == 'S') skey = false;
-
-  if (key == 'w') wkey = false;
-  if (key == 'W') wkey = false;
-}
-PImage reverseImage(PImage image) {
-  PImage reverse = createImage(image.width, image.height, ARGB);
-
-  for (int y = 0; y < image.height; y++) {
-    for (int x = 0; x < image.width; x++) {
-      int oP = image.get(x, y);
-
-      int flippedX = image.width - 1 - x;
-
-      reverse.set(flippedX, y, oP);
-    }
-  }
-  return reverse;
 }
