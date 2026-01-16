@@ -37,6 +37,16 @@ color edge = #dda15e;
 color coins = #d90429;
 color booo = #283618;
 color kTroopa = #fb5607;
+color portalRed  = #FF00FF;
+color portalBlue = #00FFAA;
+color saveC = #00FF00;   
+
+ArrayList<FSavePoint> savepoints = new ArrayList<FSavePoint>();
+
+float respawnX = 3800;  
+float respawnY = 2200;
+
+
 
 float btnX;
 float btnY;
@@ -51,7 +61,7 @@ boolean gameOver = false;
 
 PImage map, ice, stone, treeTrunk, treetop_center;
 PImage treetop_w, treetop_e, treetop_intersect, eric, lemon, agoost, dirtN;
-PImage spike, bridgeImg, trampoline, hammer, shells, coin, boo, koopaTroopa;
+PImage spike, bridgeImg, trampoline, hammer, shells, coin, boo, koopaTroopa, bportal, rportal, saveOff, saveOn;
 
 PImage[] idle;
 PImage[] jump;
@@ -62,11 +72,12 @@ PImage[] lava;
 PImage[] thwomp;
 PImage[] hammerbro;
 
-String[] maps = {"lms.png", "level2.png"};
+String[] maps = {"mlm.png", "level2.png"};
 int level = 0;
 
 ArrayList<FGameObject> terrain;
 ArrayList<FGameObject> enemies;
+ArrayList<FPortal> portals = new ArrayList<FPortal>();
 
 int gridsize = 32;
 float zoom = 1.5;
@@ -98,7 +109,7 @@ void setup() {
   enemies = new ArrayList<FGameObject>();
 
   loadImages();
-  map = loadImage("lms.png");
+  map = loadImage("mlm.png");
 
   marioFont = loadFont("FranklinGothic-Heavy-48.vlw");
   textFont(marioFont);
@@ -264,17 +275,19 @@ void actWorld() {
   }
 }
 void loselife() {
-
   lives--;
-  if (lives<=0) {
-    mode=GAMEOVER;
+  if (lives <= 0) {
+    mode = GAMEOVER;
   } else {
-    player.setPosition(350, 900);
+    player.setPosition(respawnX, respawnY);
     player.setVelocity(0, 0);
   }
 }
 
+
 void loadImages() {
+  savepoints.clear();
+
 
 
   stone = loadImage("brick.png");
@@ -293,11 +306,20 @@ void loadImages() {
   coin = loadImage("coin.png");
   boo = loadImage("boom.png");
   koopaTroopa = loadImage("koopa.png");
+  bportal  = loadImage("bportal.png");
+  bportal.resize(gridsize, gridsize);
+  
+  rportal=loadImage("rportal.png");
+  rportal.resize(gridsize,gridsize);
   
   koopaTroopa.resize(gridsize, gridsize);
   
   boo.resize(gridsize, gridsize);
-  
+  saveOff = loadImage("ssq.png");
+saveOn  = loadImage("ssq.png");
+saveOff.resize(gridsize, gridsize);
+saveOn.resize(gridsize, gridsize);
+
 
   coin.resize(gridsize, gridsize);
 
@@ -499,8 +521,32 @@ void loadWorld(PImage img) {
        enemies.add(to);
        world.add(to);
       }
+      
+      else if (c == portalRed) {
+  FPortal p = new FPortal(x*gridsize, y*gridsize, 0);
+  portals.add(p);
+  terrain.add(p);  
+  world.add(p);
+}
+else if (c == portalBlue) {
+  FPortal p = new FPortal(x*gridsize, y*gridsize, 1);
+  portals.add(p);
+  terrain.add(p);  
+  world.add(p);
+} else if (c == saveC) {
+  FSavePoint sp = new FSavePoint(x*gridsize, y*gridsize);
+  savepoints.add(sp);
+  terrain.add(sp);     
+  world.add(sp);
+}
+
+
+
     }
   }
+  
+  linkPortals();
+
 }
 void drawWorld() {
   pushMatrix();
@@ -516,6 +562,13 @@ void loadPlayer() {
   player = new FPlayer();
   world.add(player);
 }
+
+void linkPortals() {
+  for (int i = 0; i < portals.size(); i++) {
+    portals.get(i).target = portals.get((i + 1) % portals.size());
+  }
+}
+
 
 void level() {
 
@@ -543,6 +596,31 @@ void level() {
   }
 }
 
+class FPortal extends FGameObject {
+  int group;
+  FPortal target;
+
+  FPortal(float x, float y, int groupId) {
+    super();
+    setPosition(x, y);
+    setStatic(true);
+    setSensor(true);
+    setName("portal");
+    group = groupId;
+
+    if (group == 0) attachImage(rportal);
+    else attachImage(bportal);
+  }
+
+  void act() {
+    if (target != null && isTouching("player")) {
+      player.setPosition(target.getX(), target.getY()-200);
+      player.setVelocity(0, 0);
+    }
+  }
+}
+
+
 
 
 class FHammerBro extends FGameObject {
@@ -563,6 +641,7 @@ class FHammerBro extends FGameObject {
     setName("hammerbro");
     setRotatable(false);
     attachImage(hammerbro[0]);
+    setStatic(false);
   }
   void act() {
     walk();
@@ -570,6 +649,14 @@ class FHammerBro extends FGameObject {
     throwHammer();
     damagePlayer();
     Reset();
+    
+    
+    if (isTouching("shell_active")) {
+  world.remove(this);
+  enemies.remove(this);
+  return;
+}
+
   }
   void walk() {
     setVelocity(speed * direction, getVelocityY());
@@ -634,6 +721,7 @@ class FHammerBro extends FGameObject {
 
 
 class FBridge extends FGameObject {
+
   FBridge(float x, float y) {
     super();
     setPosition(x, y);
@@ -643,12 +731,49 @@ class FBridge extends FGameObject {
   }
 
   void act() {
-    if (isTouching("player")) {
-      setStatic(false);
+    if (isTouching("player") && player.getY() < getY() - gridsize/2) {
+       setStatic(false);
       setSensor(true);
     }
   }
 }
+
+class FSavePoint extends FGameObject {
+
+  boolean active = false;
+
+  FSavePoint(float x, float y) {
+    super();
+    setPosition(x, y);
+    setStatic(true);
+    setSensor(true);    
+    setName("savepoint");
+
+    if (saveOff != null) attachImage(saveOff);
+  }
+
+  void act() {
+    if (isTouching("player")) {
+      activate();
+    }
+  }
+
+  void activate() {
+
+    for (int i = 0; i < savepoints.size(); i++) {
+      savepoints.get(i).active = false;
+      if (saveOff != null) savepoints.get(i).attachImage(saveOff);
+    }
+
+    active = true;
+    if (saveOn != null) attachImage(saveOn);
+
+    respawnX = getX();
+    respawnY = getY() - gridsize;
+  }
+}
+
+
 class FGameObject extends FBox
 
 
@@ -712,11 +837,20 @@ class FGoomba extends FGameObject {
   }
 
   void collide() {
+    
+if (isTouching("shell_active")) {
+  world.remove(this);
+  enemies.remove(this);
+  return;
+}
 
-    if (isTouching("wall")) {
-      direction = direction * -1;
-      setPosition(getX()+direction, getY());
-    }
+
+  if (isTouching("wall") || isTouching("hammer") || isTouching("hammerbro") || isTouching("shell") || isTouching("koopatroopa") ) {
+  direction *= -1;
+  setPosition(getX() + direction, getY());
+}
+
+
 
     if (isTouching("player")) {
       if (player.getY() < getY() - gridsize/2) {
@@ -725,24 +859,23 @@ class FGoomba extends FGameObject {
       } else {
         loselife();
       }
+     
     }
     
-    if(isTouching ("shell")) {
-     world.remove(this);
-     enemies.remove(this);
-    }
+    //if(isTouching ("shell")) {
+    // world.remove(this);
+    // enemies.remove(this);
+    //}
   }
 }
 
 
 
 
-
 class FkoopaTroopa extends FGameObject {
 
-  int direction = L;
+  int direction = L;   
   int speed = 50;
-  int frame = 0;
 
   FkoopaTroopa(float x, float y) {
     super();
@@ -759,155 +892,46 @@ class FkoopaTroopa extends FGameObject {
   }
 
   void move() {
-    float vy = getVelocityY();
-    setVelocity(speed * direction, vy);
+    setVelocity(speed * direction, getVelocityY());
   }
 
-  void collide() {
+ void collide() {
 
-    if (isTouching("wall")) {
-      direction = direction * -1;
-      setPosition(getX() + direction, getY());
-        attachImage(reverseImage(koopaTroopa));
+  if (isTouching("shell_active")) {
+    world.remove(this);
+    enemies.remove(this);
+    return;
+  }
 
-    }
-    
+  if (isTouching("wall") || isTouching("shell") || isTouching("hammerbro") || isTouching("goomba")) {
+    direction *= -1;
+    setPosition(getX() + direction, getY());
+  }
 
-    if (isTouching("player")) {
+  if (isTouching("player")) {
+    if (player.getY() < getY() - gridsize/2) {
 
-      if (player.getY() < getY()) {
+      FShell shell = new FShell(getX(), getY());
+      world.add(shell);
+      enemies.add(shell);
 
-        FShell shell = new FShell(getX(), getY());
-        world.add(shell);
-        enemies.add(shell);
-
-        world.remove(this);
-        enemies.remove(this);
-      }
-      else {
-        loselife();
-      }
-    }
-
-    if (isTouching("shell")) {
       world.remove(this);
       enemies.remove(this);
-    }
-  }
-}
 
-
-
-class FLava extends FGameObject {
-
-  int frame = 0;
-
-  FLava(float x, float y) {
-    super();
-    setPosition(x, y);
-    setStatic(true);
-    setName("lava");
-    attachImage(lava[0]);
-  }
-
-  void act() {
-    animate();
-  }
-
-
-  void animate() {
-    if (frame >= lava.length) frame = 0;
-    if (frameCount % 5 == 0) {
-      attachImage(lava[frame]);
-      frame++;
-    }
-  }
-}
-
-
-class FPlayer extends FGameObject {
-  
-  PImage[] idleL, jumpL, runL;
-  int frame;
-  int direction;
-
-  float jStrength = 430;
-  float speed = 200;
-  int maxJ = 3;
-
-  int jumps = 0;
-  boolean onGround = false;
-
-  FPlayer() {
-    super();
-    frame = 0;
-    direction = R;
-    setPosition(0, 2800);
-    setName("player");
-    setRotatable(false);
- }
-  void act() {
-    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone")
-    || isTouching("treetrunk") || isTouching("treetopw") || isTouching ("treetope") || isTouching ("treetopintersect") || isTouching("bridge");
-
-
-    if (onGround && abs(getVelocityY()) < 1) {
-      jumps = 0;
-    }
-
-    input();
-    animate();
-
-    if (isTouching("spike") || isTouching("lava" )) {
+      player.setVelocity(player.getVelocityX(), -300);
+    } else {
       loselife();
     }
   }
-
-  void input() {
-    boolean moving = false;
-    float vx = getVelocityX();
-    float vy = getVelocityY();
-
-    if (akey || leftkey) {
-      setVelocity(-speed, vy);
-      moving = true;
-      direction = L;
-    }
-
-    if (dkey||rightkey)  {
-      setVelocity(speed, vy);
-      moving = true;
-      direction = R;
-    }
-
-    if (wkey||upkey) {
-      if (jumps < maxJ) {
-
-        // jumpSound.play();
-        //jumpSound.amp(0.367);
-        setVelocity(vx, -jStrength);
-
-        jumps++;
-      }
-      wkey = false;
-    }
-
-
-
-    if (abs(vy) > 0.1) action = jump;
-    else if (moving==true) action = run;
-    else action = idle;
-  }
-  void animate() {
-    if (frame >= action.length) frame = 0;
-
-    if (frameCount % 5 == 0) {
-      if (direction == R) attachImage(action[frame]);
-      else attachImage(reverseImage(action[frame]));
-      frame++;
-    }
-  }
 }
+
+}
+
+
+
+
+
+
 class FShell extends FGameObject {
 
   int direction = 0; 
@@ -917,52 +941,42 @@ class FShell extends FGameObject {
     super();
     setPosition(x, y);
     setStatic(false);
-    setName("shell");
+    setName("shell");  
     setRotatable(false);
     attachImage(shells);
   }
 
   void act() {
-    float vy = getVelocityY();
-    setVelocity(direction * speed, vy);
-    
-  
+    setVelocity(direction * speed, getVelocityY());
     collide();
   }
 
   void collide() {
-    if (isTouching("wall")) {
-      direction = direction * -1;
-      setPosition(getX() + direction, getY()); 
-    }
+
+  if (direction != 0 && isTouching("wall")) {
+  direction *= -1;
+  setPosition(getX() + direction, getY());
+}
+
 
     if (isTouching("player")) {
       if (player.getY() < getY() - gridsize/2) {
-        
-        direction = 0; 
+        direction = 0;
+        setName("shell");
         player.setVelocity(player.getVelocityX(), -300);
-      } 
-      else {
+      } else {
         if (direction == 0) {
-          if (player.getX() < getX()) {
-            direction = 1; 
-          } else {
-            direction = -1; 
-          }
-          setPosition(getX() + direction * 5, getY()); 
+          direction = (player.getX() < getX()) ? R : L;
+          setName("shell_active"); 
+          setPosition(getX() + direction * 5, getY());
         } else {
           loselife();
         }
       }
     }
-
-    if (direction != 0) {
-      if (isTouching("goomba") || isTouching("boo") || isTouching("koopatroopa")) {
-      
-      }
-    }
   }
 }
+
 
 
 
@@ -1000,7 +1014,7 @@ class FBoo extends FGameObject {
     }
     
     
-if(isTouching ("shell")) {
+if(isTouching ("shell_active")) {
      world.remove(this);
      enemies.remove(this);
     }
