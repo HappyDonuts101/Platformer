@@ -26,7 +26,6 @@ if (direction == R) {
 }
     move();
     collide();
-    setStatic(false);
   }
 
   void move() {

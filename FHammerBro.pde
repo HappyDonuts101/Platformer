@@ -23,16 +23,19 @@ class FHammerBro extends FGameObject {
     setStatic(false);
   }
   void act() {
+    
+    if (freeze) {
+  setVelocity(0, 0);
+  return;
+}
+    
     walk();
     turn();
     throwHammer();
     damagePlayer();
     Reset();
     
-    if (freeze) {
-  setVelocity(0, 0);
-  return;
-}
+    
 
     
     if (isTouching("shell_active")) {

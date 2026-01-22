@@ -11,10 +11,17 @@ void keyPressed() {
   if (keyCode == LEFT) leftkey = true;
   if (keyCode == RIGHT) rightkey = true;
 
-  if (key == 'p' || key == 'P') {
-    if (mode == GAME) mode = PAUSE;
-  }
+ if (key == 'p' || key == 'P') {
+  if (mode == GAME) mode = PAUSE;
+  else if (mode == PAUSE) mode = GAME;
 }
+
+}
+boolean mouseTouchingButton() {
+  return mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH;
+}
+
+
 
 void keyReleased() {
   if (key == 'a') akey = false;

@@ -31,7 +31,7 @@ class FShell extends FGameObject {
     
     
 
-    if (direction != 0 && isTouching("wall")) {
+    if (direction != 0 && isTouching("wall") || isTouching("shell")) {
       direction *= -1;
       setPosition(getX() + direction, getY());
     }

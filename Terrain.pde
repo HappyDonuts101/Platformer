@@ -64,12 +64,11 @@ int btnW=200;
 PFont marioFont;
 
 int lives = 3;
-boolean gameOver = false;
 
 
 PImage map, ice, stone, treeTrunk, treetop_center;
 PImage treetop_w, treetop_e, treetop_intersect, eric, lemon, agoost, dirtN;
-PImage spike, bridgeImg, trampoline, hammer, shells, coin, boo, koopaTroopa, bportal, rportal, saveOff, saveOn, onSwitch, offSwitch;
+PImage spike, bridgeImg, trampoline, hammer, shells, coin, boo, koopaTroopa, bportal, rportal, saveOff, saveOn, onSwitch, offSwitch, gamewinGif;
 
 PImage[] idle;
 PImage[] jump;
@@ -158,15 +157,24 @@ void intro() {
   fill(red);
   text("Super Mario", width/2, height/2);
 
-  btnX = width/2 - btnW/2;
-  btnY = height/2 + 300;
+btnX = width/2 - btnW/2;
+btnY = height/2 + 300;
 
-  fill(100);
-  rect(btnX, btnY, btnW, btnH);
+fill(100);
 
-  fill(255);
-  textSize(24);
-  text("START", width/2, 730);
+
+if (mouseTouchingButton()) {
+  stroke(pink);
+  strokeWeight(5);
+}
+
+rect(btnX, btnY, btnW, btnH);
+
+fill(255);
+noStroke();
+textSize(24);
+text("START", width/2, 730);
+
 }
 void updateFreeze() {
   if (freeze && millis() > freezeTime) {
@@ -176,6 +184,7 @@ void updateFreeze() {
 
 void gamewin() {
   background(0);
+  image(gameOverGif, 0,0,width,height);
 
   fill(255);
   textAlign(CENTER, CENTER);
@@ -183,20 +192,29 @@ void gamewin() {
   text("YOU WIN", width/2, height/2);
   fill(100);
   btnX = width/2 - btnW/2;
-  btnY = height/2 + 200;
+btnY = height/2 + 200;
 
-  fill(100);
-  rect(btnX, btnY, btnW, btnH);
+fill(100);
+stroke(50);
+strokeWeight(4);
 
-  fill(255);
-  textSize(24);
-  text("PLAY AGAIN", width/2, btnY + btnH/2);
+if (mouseTouchingButton()) {
+  stroke(pink);
+}
+
+rect(btnX, btnY, btnW, btnH);
+
+fill(255);
+noStroke();
+textSize(24);
+text("PLAY AGAIN", width/2, btnY + btnH/2);
+
 }
 
 void gameover() {
   background(0);
 
-  //image(gameOverGif, 0, 0, width, height);
+  image(gameOverGif, 0, 0, width, height);
 
   fill(255);
   textAlign(CENTER, CENTER);
@@ -204,12 +222,23 @@ void gameover() {
   text("YOU DIED!", width/2, height/2);
 
   btnX = width/2 - btnW/2;
-  btnY = height/2 + 200;
-  fill(100);
-  rect(btnX, btnY, btnW, btnH);
-  fill(255);
-  textSize(24);
-  text("RESTART", width/2, btnY + btnH/2);
+btnY = height/2 + 200;
+
+fill(100);
+stroke(50);
+strokeWeight(2);
+
+if (mouseTouchingButton()) {
+  stroke(pink);
+}
+
+rect(btnX, btnY, btnW, btnH);
+
+fill(255);
+noStroke();
+textSize(24);
+text("RESTART", width/2, btnY + btnH/2);
+
 }
 
 
@@ -229,20 +258,20 @@ void pause() {
 
 void mousePressed() {
   if (mode == INTRO) {
-    if (mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH) {
+    if (mouseTouchingButton()) {
       mode = GAME;
     }
   } else if (mode == GAMEOVER) {
     level = 0;
     map = loadImage(maps[level]);
-    if (mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH) {
+    if (mouseTouchingButton()) {
       resetGame();
       mode = GAME;
     }
   } else if (mode == WIN) {
     level = 0;
     map = loadImage(maps[level]);
-    if (mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH) {
+    if (mouseTouchingButton()) {
       resetGame();
       mode = GAME;
     }
@@ -274,9 +303,6 @@ void actWorld() {
     level();
   }
 
-for (int i = 0; i < tbridges.size(); i++) {
-  tbridges.get(i).act();
-}
 
 
   for (int i = enemies.size() - 1; i >= 0; i--) {
@@ -292,11 +318,7 @@ for (int i = 0; i < tbridges.size(); i++) {
     }
   }
   
-  for (int i = 0; i < terrain.size(); i++) {
-  if (terrain.get(i) instanceof FBridgeSwitch) {
-    ((FBridgeSwitch)terrain.get(i)).act();
-  }
-}
+  
 
 
   for (int i = 0; i < terrain.size(); i++) {

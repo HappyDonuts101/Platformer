@@ -24,7 +24,7 @@ class FPlayer extends FGameObject {
 
   void act() {
 
-    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("bridge") || isTouching("stone")
+    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("stone")
       || isTouching("treetrunk") || isTouching("treetopw") || isTouching("treetope")
       || isTouching("treetopintersect") || isTouching("bridge");
 
