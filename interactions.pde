@@ -1,20 +1,15 @@
 void keyPressed() {
-  if (key == 'a') akey = true;
-  if (key == 'A') akey = true;
-  
-  if(keyCode == UP) upkey = true;
-  if(keyCode ==DOWN) downkey = true;
-  if(keyCode == LEFT) leftkey=true;
-  if(keyCode==RIGHT) rightkey= true;
+  if (key == 'a' || key == 'A') akey = true;
+  if (key == 'd' || key == 'D') dkey = true;
+  if (key == 's' || key == 'S') skey = true;
+  if (key == 'w' || key == 'W') wkey = true;
 
-  if (key == 'd') dkey = true;
-  if (key == 'D') dkey = true;
+  if (key == 'e' || key == 'E') ekey = true;   
 
-  if (key == 's') skey = true;
-  if (key == 'S') skey = true;
-
-  if (key == 'w' ) wkey = true;
-  if (key == 'W' ) wkey = true;
+  if (keyCode == UP) upkey = true;
+  if (keyCode == DOWN) downkey = true;
+  if (keyCode == LEFT) leftkey = true;
+  if (keyCode == RIGHT) rightkey = true;
 
   if (key == 'p' || key == 'P') {
     if (mode == GAME) mode = PAUSE;
@@ -30,6 +25,8 @@ void keyReleased() {
 
   if (key == 's') skey = false;
   if (key == 'S') skey = false;
+
+if(key=='e' || key=='E') ekey = false;
 
   if (key == 'w') wkey = false;
   if (key == 'W') wkey = false;
