@@ -105,7 +105,7 @@ final int WIN = 4;
 int mode ;
 
 void setup() {
-  size(1200, 800);
+  size(1200, 800,JAVA2D);
   Fisica.init(this);
     introGif = new Gif(this, "mari.gif");
     introGif.loop();
