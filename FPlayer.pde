@@ -17,16 +17,17 @@ class FPlayer extends FGameObject {
     super();
     frame = 0;
     direction = R;
-    setPosition(300, 1300);
+    setPosition(0, 2800);
     setName("player");
     setRotatable(false);
   }
 
   void act() {
 
-    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") || isTouching("stone")
-      || isTouching("treetrunk") || isTouching("treetopw") || isTouching("treetope")
-      || isTouching("treetopintersect") || isTouching("bridge");
+    onGround = isTouching("wall") || isTouching("dirt") || isTouching("ice") 
+    || isTouching("stone")|| isTouching("treetrunk") || isTouching("treetopw") 
+    || isTouching("treetope") || isTouching("treetopintersect") || isTouching("bridge");
+
 
     if (onGround && abs(getVelocityY()) < 1) {
       jumps = 0;

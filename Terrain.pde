@@ -6,11 +6,6 @@ import gifAnimation.*;
 Gif introGif;
 Gif gameOverGif;
 
-import processing.sound.*;
-
-SoundFile jumpSound;
-SoundFile bopSound;
-
 import fisica.*;
 
 //Color Pallete
@@ -44,8 +39,8 @@ color saveC = #00FF00;
 color bridgeSwitch = #12B3FF;
 color freezeSwitchC = #00B4D8; 
 
-float respawnX = 3800;  
-float respawnY = 2200;
+float respawnX = 0;  
+float respawnY = 2800;
 
 boolean freeze = false;
 int freezeTime = 0;        
@@ -79,7 +74,7 @@ PImage[] lava;
 PImage[] thwomp;
 PImage[] hammerbro;
 
-String[] maps = {"va.png", "afc.png"};
+String[] maps = {"lkl.png", "lam.png"};
 int level = 0;
 
 ArrayList<FGameObject> terrain;
@@ -111,14 +106,12 @@ void setup() {
     introGif.loop();
     gameOverGif = new Gif(this, "mario.gif");
     gameOverGif.loop();
-  jumpSound = new SoundFile(this, "jump.mp3");
-  bopSound  = new SoundFile(this, "bop.mp3");
 
   terrain = new ArrayList<FGameObject>();
   enemies = new ArrayList<FGameObject>();
 
   loadImages();
-  map = loadImage("va.png");
+  map = loadImage("lkl.png");
 
   marioFont = loadFont("FranklinGothic-Heavy-48.vlw");
   textFont(marioFont);
@@ -655,6 +648,9 @@ void linkPortals() {
 }
 
 void level() {
+
+respawnX = 0;
+respawnY = 2800;
 
 
   level = level + 1;
