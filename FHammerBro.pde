@@ -24,10 +24,8 @@ class FHammerBro extends FGameObject {
   }
   void act() {
     
-    if (freeze) {
-  setVelocity(0, 0);
-  return;
-}
+   if (stopIfPressed(this)) return;
+
     
     walk();
     turn();
@@ -90,8 +88,8 @@ class FHammerBro extends FGameObject {
       if (player.getY() < getY() - gridsize/2) {
 
 
-        world.remove(this);
-        enemies.remove(this);
+             removeEnemy(this);
+
       } else {
         loselife();
       }

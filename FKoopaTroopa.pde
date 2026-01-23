@@ -13,10 +13,8 @@ class FkoopaTroopa extends FGameObject {
   }
 
   void act() {
-    if (freeze==true) {
-  setVelocity(0, 0);
-  return;
-}
+    if (stopIfPressed(this)) return;
+
 
     
 if (direction == R) {
@@ -35,8 +33,8 @@ if (direction == R) {
 void collide() {
 
   if (isTouching("shell_active")) {
-    world.remove(this);
-    enemies.remove(this);
+       removeEnemy(this);
+
     return;
   }
 
@@ -57,8 +55,8 @@ void collide() {
       world.add(shell);
       enemies.add(shell);
 
-      world.remove(this);
-      enemies.remove(this);
+          removeEnemy(this);
+
 
       player.setVelocity(player.getVelocityX(), -300);
     } else {

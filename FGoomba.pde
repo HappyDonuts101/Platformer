@@ -18,10 +18,8 @@ class FGoomba extends FGameObject {
     move();
     collide();
     
-    if (freeze==true) {
-  setVelocity(0, 0);
-  return;
-}
+   if (stopIfPressed(this)) return;
+
 
   }
 
@@ -41,8 +39,8 @@ class FGoomba extends FGameObject {
   void collide() {
     
 if (isTouching("shell_active")) {
-  world.remove(this);
-  enemies.remove(this);
+      removeEnemy(this);
+
   return;
 }
 

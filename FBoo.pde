@@ -13,7 +13,7 @@ class FBoo extends FGameObject {
   }
 
   void act() {
-    if (freeze) return;
+if (stopIfPressed(this)) return;
 
     
 if (player.getX() < getX()) {
@@ -34,8 +34,8 @@ if (player.getX() < getX()) {
 
     if (isTouching("player")) {
       if (player.getY() < getY() - gridsize/2) {
-        world.remove(this);
-        enemies.remove(this);
+            removeEnemy(this);
+
       } else {
         loselife();
       }
@@ -43,8 +43,7 @@ if (player.getX() < getX()) {
     
     
 if(isTouching ("shell_active")) {
-     world.remove(this);
-     enemies.remove(this);
+     removeEnemy(this);
     }
   }
 }

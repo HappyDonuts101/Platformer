@@ -17,7 +17,7 @@ class FThwomp extends FGameObject {
 
   void act() {
     
-    if (freeze) return;
+if (stopIfPressed(this)) return;
 
     if (awake==false) {
       wakeup();

@@ -617,6 +617,19 @@ else if (c == portalBlue) {
   linkPortals();
 
 }
+
+boolean stopIfPressed(FBody b) {
+  if (!freeze) return false;
+  b.setVelocity(0, 0);
+  return true;
+}
+
+ void removeEnemy(FGameObject e) {
+  world.remove(e);
+  enemies.remove(e);
+}
+
+
 void drawWorld() {
   pushMatrix();
   translate(-player.getX()*zoom + width/2, -player.getY()*zoom + height/2);
@@ -674,8 +687,5 @@ player.setVelocity(0, 0);
 }
 
 
-
-
-
- 
+  
   

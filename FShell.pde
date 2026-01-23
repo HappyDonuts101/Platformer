@@ -18,10 +18,8 @@ class FShell extends FGameObject {
 
   void act() {
     
-    if (freeze) {
-  setVelocity(0, 0);
-  return;
-}
+   if (stopIfPressed(this)) return;
+
     setVelocity(direction * speed, getVelocityY());
     collide();
   }
