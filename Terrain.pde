@@ -153,7 +153,6 @@ void intro() {
 btnX = width/2 - btnW/2;
 btnY = height/2 + 300;
 
-fill(100);
 
 
 if (mouseTouchingButton()) {
@@ -184,7 +183,7 @@ void gamewin() {
   textSize(60);
   text("YOU WIN", width/2, height/2);
   fill(100);
-  btnX = width/2 - btnW/2;
+ btnX = width/2 - btnW/2;
 btnY = height/2 + 200;
 
 fill(100);
@@ -217,7 +216,7 @@ void gameover() {
   btnX = width/2 - btnW/2;
 btnY = height/2 + 200;
 
-fill(100);
+fill(red);
 stroke(50);
 strokeWeight(2);
 
@@ -237,7 +236,7 @@ text("RESTART", width/2, btnY + btnH/2);
 
 
 void pause() {
-  fill(0, 150);
+  fill(red);
   rect(0, 0, width, height);
 
   fill(255);
